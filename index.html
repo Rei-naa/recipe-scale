@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recipe Ingredient Calculator</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Recipe Ingredient Calculator</h1>
+    <p>Scale your recipes based on your target servings.</p>
+  </header>
+
+  <main>
+    <section>
+      <h2>Create Recipe</h2>
+
+      <label for="recipeName">Recipe Name</label>
+      <input type="text" id="recipeName" placeholder="Example: Pizza Dough" />
+
+      <label for="originalServing">Original Serving</label>
+      <input type="number" id="originalServing" placeholder="Example: 2" />
+
+      <label for="targetServing">Target Serving</label>
+      <input type="number" id="targetServing" placeholder="Example: 4" />
+
+      <button id="calculateBtn">Calculate</button>
+    </section>
+
+    <section>
+      <h2>Ingredients</h2>
+
+      <div id="ingredientsList"></div>
+
+      <button id="addIngredientBtn">Add Ingredient</button>
+    </section>
+
+    <section>
+      <h2>Results</h2>
+      <div id="results"></div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
