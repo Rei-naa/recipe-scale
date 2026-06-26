@@ -3,45 +3,165 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Recipe Ingredient Calculator</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>RecipeScale | Recipe Calculator</title>
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
-  <header>
-    <h1>Recipe Ingredient Calculator</h1>
-    <p>Scale your recipes based on your target servings.</p>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="RecipeScale home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>RecipeScale</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="#home">Home</a>
+      <a href="#calculator">Calculator</a>
+      <a href="#saved">Saved Recipes</a>
+      <a href="#about">About</a>
+    </nav>
   </header>
 
   <main>
-    <section>
-      <h2>Create Recipe</h2>
+    <section class="hero page-shell" id="home">
+      <div class="hero-copy">
+        <p class="eyebrow">Perfect scaling every time</p>
+        <h1>Scale your <em>recipes</em> in seconds</h1>
+        <p>
+          Create recipes, add ingredients, and adjust measurements based on your
+          target servings. RecipeScale keeps the kitchen math clear, fast, and accurate.
+        </p>
+        <div class="button-row">
+          <a class="btn btn-primary" href="#calculator">Start Calculating</a>
+          <a class="text-link" href="#about">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            How it works
+          </a>
+        </div>
+      </div>
 
-      <label for="recipeName">Recipe Name</label>
-      <input type="text" id="recipeName" placeholder="Example: Pizza Dough" />
-
-      <label for="originalServing">Original Serving</label>
-      <input type="number" id="originalServing" placeholder="Example: 2" />
-
-      <label for="targetServing">Target Serving</label>
-      <input type="number" id="targetServing" placeholder="Example: 4" />
-
-      <button id="calculateBtn">Calculate</button>
+      <div class="hero-board" aria-label="RecipeScale preview">
+        <article class="hero-photo main-photo">
+          <img src="assets/images/sourdough-hero.png" alt="Sourdough loaf" />
+          <div>
+            <span>Today's Pick</span>
+            <strong>Sourdough Mastery</strong>
+          </div>
+        </article>
+        <article class="mini-stat peach">
+          <span class="round-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M12 5v14"/></svg></span>
+          <div><small>Precision</small><strong>Clean ratios</strong></div>
+        </article>
+        <article class="mini-stat">
+          <span class="round-icon gold"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 20V10M12 20V4M17 20v-7"/></svg></span>
+          <div><small>Servings</small><strong>4 to 8</strong></div>
+        </article>
+        <article class="hero-photo herb-photo">
+          <img src="assets/images/prep-counter.png" alt="Kitchen preparation" />
+        </article>
+        <article class="progress-card">
+          <div class="progress-bar"><span></span></div>
+          <small>Scaling calculation: 200%</small>
+        </article>
+      </div>
     </section>
 
-    <section>
-      <h2>Ingredients</h2>
-
-      <div id="ingredientsList"></div>
-
-      <button id="addIngredientBtn">Add Ingredient</button>
+    <section class="features page-shell" id="about">
+      <div class="section-heading">
+        <h2>RecipeScale</h2>
+        <p>Simplify your kitchen workflow with focused tools for scaling, saving, and reusing recipes.</p>
+      </div>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <span class="feature-icon green"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16M7 16l4-8 3 5 3-7 2 10"/></svg></span>
+          <h3>Instant Scaling</h3>
+          <p>Adjust recipe servings quickly while keeping every ingredient proportional.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-icon gold"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v16l-7-4-7 4z"/></svg></span>
+          <h3>Recipe Vault</h3>
+          <p>Save favorite recipes locally in your browser and return to them anytime.</p>
+        </article>
+        <article class="feature-card">
+          <span class="feature-icon orange"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10M7 12h10M7 16h6M5 4h14v16H5z"/></svg></span>
+          <h3>Kitchen Ready</h3>
+          <p>Review a clean scaled ingredient list before you start measuring.</p>
+        </article>
+      </div>
     </section>
 
-    <section>
-      <h2>Results</h2>
-      <div id="results"></div>
+    <section class="calculator-section page-shell" id="calculator">
+      <aside class="recipe-panel">
+        <h2>Recipe Scaling</h2>
+        <p>Adjust your favorite recipes instantly. Whether cooking for two or a larger table, the app handles the math.</p>
+
+        <label for="recipeName">Recipe Name</label>
+        <input id="recipeName" type="text" placeholder="Grandma's Sourdough" value="Grandma's Sourdough" />
+
+        <div class="yield-grid">
+          <label for="originalServing">
+            <span>Original Yield</span>
+            <input id="originalServing" class="number-field" type="text" inputmode="decimal" value="4" />
+            <small>servings</small>
+          </label>
+          <label for="targetServing">
+            <span>Target Yield</span>
+            <input id="targetServing" class="number-field" type="text" inputmode="decimal" value="8" />
+            <small>servings</small>
+          </label>
+        </div>
+
+        <img class="panel-photo" src="assets/images/prep-counter.png" alt="Flour on a kitchen counter" />
+      </aside>
+
+      <div class="ingredients-card">
+        <div class="card-head">
+          <h3><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 6h13M7 12h13M7 18h13M4 6h.01M4 12h.01M4 18h.01"/></svg> Ingredients List</h3>
+          <span id="ingredientCount">0 Ingredients Added</span>
+        </div>
+        <div id="messageArea" class="message-area" aria-live="polite"></div>
+        <div id="ingredientsList" class="ingredient-list"></div>
+        <div class="actions">
+          <button class="btn btn-outline" type="button" id="addIngredientBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Add Ingredient
+          </button>
+          <button class="btn btn-secondary" type="button" id="saveRecipeBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v16l-7-4-7 4z"/></svg>
+            Save Recipe
+          </button>
+          <button class="btn btn-primary" type="button" id="calculateBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg>
+            Calculate
+          </button>
+          <button class="btn btn-clear" type="button" id="clearFormBtn">Clear Form</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="results-section page-shell" id="results">
+      <p class="eyebrow">Scaling Results</p>
+      <h2>Adjusted Ingredients</h2>
+      <div id="resultsCard" class="results-card">
+        <p class="empty-result">Enter a recipe and calculate to see scaled ingredient amounts here.</p>
+      </div>
+    </section>
+
+    <section class="saved-section page-shell" id="saved">
+      <div class="saved-head">
+        <div>
+          <h2>Your Kitchen Collection</h2>
+          <p>Access and manage saved recipes from this browser.</p>
+        </div>
+        <a class="btn btn-outline" href="#calculator">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Scale New Recipe
+        </a>
+      </div>
+      <div id="savedRecipes" class="saved-grid"></div>
     </section>
   </main>
 
-  <script src="script.js"></script>
+  <script src="js/calculator.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
