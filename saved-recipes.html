@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RecipeScale | Saved Recipes</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="RecipeScale home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>RecipeScale</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a href="calculator.html">Calculator</a>
+      <a href="saved-recipes.html">Saved Recipes</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="saved-section page-shell" id="saved">
+      <div class="saved-head">
+        <div>
+          <h2>Your Kitchen Collection</h2>
+          <p>Access and manage saved recipes from this browser.</p>
+        </div>
+        <a class="btn btn-outline" href="calculator.html">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Scale New Recipe
+        </a>
+      </div>
+      <div id="savedRecipes" class="saved-grid"></div>
+    </section>
+  </main>
+
+  <footer class="footer-placeholder">
+      <!-- Footer content will be added later -->
+  </footer>
+
+  <script src="js/calculator.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

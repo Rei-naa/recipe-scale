@@ -32,6 +32,7 @@
   }
 
   function renderRows(ingredients) {
+    if (!$("#ingredientsList")) return;
     const rows = ingredients.length ? ingredients : [{ name: "", amount: "", unit: "grams" }];
     $("#ingredientsList").innerHTML = rows.map(function (ingredient, index) {
       return [
@@ -47,6 +48,7 @@
   }
 
   function readRecipe() {
+    if (!$("#recipeName")) return null;
     return {
       id: editingRecipeId || "",
       name: $("#recipeName").value.trim(),
@@ -75,10 +77,13 @@
   }
 
   function showMessage(message, type) {
-    $("#messageArea").innerHTML = message ? "<p class=\"message " + (type || "") + "\">" + escapeHtml(message) + "</p>" : "";
+    const messageArea = $("#messageArea");
+    if (!messageArea) return;
+    messageArea.innerHTML = message ? "<p class=\"message " + (type || "") + "\">" + escapeHtml(message) + "</p>" : "";
   }
 
   function renderResults(recipe) {
+    if (!$("#resultsCard")) return;
     const scaledIngredients = calculator.scaleIngredients(recipe.ingredients, recipe.originalServing, recipe.targetServing);
     const multiplier = recipe.targetServing / recipe.originalServing;
     $("#resultsCard").innerHTML = [
@@ -101,8 +106,9 @@
   }
 
   function renderSavedRecipes() {
-    const recipes = storage.getRecipes();
     const mount = $("#savedRecipes");
+    if (!mount) return;
+    const recipes = storage.getRecipes();
     if (!recipes.length) {
       mount.innerHTML = "";
       return;
@@ -127,6 +133,7 @@
 
   function calculateRecipe() {
     const recipe = readRecipe();
+    if (!recipe) return null;
     const error = validate(recipe);
     if (error) {
       showMessage(error, "error");
@@ -147,6 +154,7 @@
   }
 
   function fillRecipe(recipe) {
+    if (!$("#recipeName")) return;
     editingRecipeId = recipe.id;
     $("#recipeName").value = recipe.name;
     $("#originalServing").value = recipe.originalServing;
@@ -156,18 +164,21 @@
   }
 
   function clearForm() {
+    if (!$("#recipeName")) return;
     editingRecipeId = null;
     $("#recipeName").value = "";
     $("#originalServing").value = "4";
     $("#targetServing").value = "8";
     renderRows([{ name: "", amount: "", unit: "grams" }]);
     showMessage("", "");
-    $("#resultsCard").innerHTML = "<p class=\"empty-result\">Enter a recipe and calculate to see scaled ingredient amounts here.</p>";
+    if ($("#resultsCard")) {
+      $("#resultsCard").innerHTML = "<p class=\"empty-result\">Enter a recipe and calculate to see scaled ingredient amounts here.</p>";
+    }
   }
 
-  function init() {
+  function initCalculator() {
+    if (!$("#ingredientsList")) return;
     renderRows([{ name: "", amount: "", unit: "grams" }]);
-    renderSavedRecipes();
 
     $("#addIngredientBtn").addEventListener("click", function () {
       const ingredients = readRecipe().ingredients;
@@ -187,7 +198,14 @@
       ingredients.splice(Number(button.dataset.index), 1);
       renderRows(ingredients.length ? ingredients : [{ name: "", amount: "", unit: "grams" }]);
     });
-    $("#savedRecipes").addEventListener("click", function (event) {
+  }
+
+  function initSavedRecipes() {
+    const savedRecipes = $("#savedRecipes");
+    if (!savedRecipes) return;
+    renderSavedRecipes();
+
+    savedRecipes.addEventListener("click", function (event) {
       const button = event.target.closest("button[data-action]");
       if (!button) return;
       const id = button.dataset.id;
@@ -200,6 +218,11 @@
       const recipe = storage.findRecipe(id);
       if (recipe) fillRecipe(recipe);
     });
+  }
+
+  function init() {
+    initCalculator();
+    initSavedRecipes();
   }
 
   document.addEventListener("DOMContentLoaded", init);

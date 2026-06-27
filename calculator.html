@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RecipeScale | Calculator</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html" aria-label="RecipeScale home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>RecipeScale</span>
+    </a>
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="index.html">Home</a>
+      <a href="calculator.html">Calculator</a>
+      <a href="saved-recipes.html">Saved Recipes</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="calculator-section page-shell" id="calculator">
+      <aside class="recipe-panel">
+        <h2>Recipe Scaling</h2>
+        <p>Adjust your favorite recipes instantly. Whether cooking for two or a larger table, the app handles the math.</p>
+
+        <label for="recipeName">Recipe Name</label>
+        <input id="recipeName" type="text" placeholder="Grandma's Sourdough" value="Grandma's Sourdough" />
+
+        <div class="yield-grid">
+          <label for="originalServing">
+            <span>Original Yield</span>
+            <input id="originalServing" class="number-field" type="text" inputmode="decimal" value="4" />
+            <small>servings</small>
+          </label>
+          <label for="targetServing">
+            <span>Target Yield</span>
+            <input id="targetServing" class="number-field" type="text" inputmode="decimal" value="8" />
+            <small>servings</small>
+          </label>
+        </div>
+
+        <img class="panel-photo" src="assets/images/prep-counter.png" alt="Flour on a kitchen counter" />
+      </aside>
+
+      <div class="ingredients-card">
+        <div class="card-head">
+          <h3><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 6h13M7 12h13M7 18h13M4 6h.01M4 12h.01M4 18h.01"/></svg> Ingredients List</h3>
+          <span id="ingredientCount">0 Ingredients Added</span>
+        </div>
+        <div id="messageArea" class="message-area" aria-live="polite"></div>
+        <div id="ingredientsList" class="ingredient-list"></div>
+        <div class="actions">
+          <button class="btn btn-outline" type="button" id="addIngredientBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Add Ingredient
+          </button>
+          <button class="btn btn-secondary" type="button" id="saveRecipeBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v16l-7-4-7 4z"/></svg>
+            Save Recipe
+          </button>
+          <button class="btn btn-primary" type="button" id="calculateBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h4"/></svg>
+            Calculate
+          </button>
+          <button class="btn btn-clear" type="button" id="clearFormBtn">Clear Form</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="results-section page-shell" id="results">
+      <p class="eyebrow">Scaling Results</p>
+      <h2>Adjusted Ingredients</h2>
+      <div id="resultsCard" class="results-card">
+        <p class="empty-result">Enter a recipe and calculate to see scaled ingredient amounts here.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer-placeholder">
+      <!-- Footer content will be added later -->
+  </footer>
+
+  <script src="js/calculator.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
