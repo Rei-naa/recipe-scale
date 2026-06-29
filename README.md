@@ -68,11 +68,12 @@ Open `index.html` directly in your browser, or use the Live Server extension in 
 
 ```txt
 recipe-scale/
-├── index.html
-├── styles.css
-├── script.js
-├── README.md
-└── assets/
++-- index.html
++-- htmls/
++-- css/
++-- js/
++-- README.md
++-- assets/
 ```
 
 ## Future Improvements

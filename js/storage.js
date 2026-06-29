@@ -25,9 +25,12 @@
       };
     }
 
+    const title = step && step.title ? String(step.title) : "";
+    const body = step && step.body ? String(step.body) : "";
+
     return {
-      title: step && step.title ? String(step.title) : "Step " + (index + 1),
-      body: step && step.body ? String(step.body) : ""
+      title: title || (body ? "Step " + (index + 1) : ""),
+      body: body
     };
   }
 
@@ -47,6 +50,7 @@
     return {
       id: recipe && recipe.id ? String(recipe.id) : createId(),
       name: recipe && recipe.name ? String(recipe.name) : "Untitled Recipe",
+      description: recipe && recipe.description ? String(recipe.description) : "",
       originalServing: recipe && Number.isFinite(Number(recipe.originalServing)) ? Number(recipe.originalServing) : 1,
       targetServing: recipe && Number.isFinite(Number(recipe.targetServing)) ? Number(recipe.targetServing) : 1,
       ingredients: ingredients,
