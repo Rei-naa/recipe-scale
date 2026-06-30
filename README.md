@@ -15,7 +15,7 @@ RecipeScale is a beginner-friendly web application designed for home cooks, bake
 * Enter ingredient amount and unit
 * Automatically calculate adjusted measurements
 * View calculated results clearly
-* Save recipes using localStorage
+* Save recipes using Supabase Auth and PostgreSQL
 * Edit or delete saved recipes
 * Responsive design for desktop and mobile
 
@@ -24,6 +24,7 @@ RecipeScale is a beginner-friendly web application designed for home cooks, bake
 * HTML
 * CSS
 * JavaScript
+* Supabase
 
 ## Formula Used
 
@@ -44,7 +45,7 @@ Salt: 10g → 20g
 
 ## Project Goal
 
-The goal of RecipeScale is to practice core JavaScript skills while building a useful real-world project. This project focuses on DOM manipulation, form handling, arrays, objects, calculations, event listeners, and localStorage.
+The goal of RecipeScale is to practice core JavaScript skills while building a useful real-world project. This project focuses on DOM manipulation, form handling, arrays, objects, calculations, event listeners, Supabase Auth, and PostgreSQL-backed recipe storage.
 
 ## Getting Started
 
@@ -70,10 +71,29 @@ Open `index.html` directly in your browser, or use the Live Server extension in 
 recipe-scale/
 +-- index.html
 +-- htmls/
++-- auth/
 +-- css/
 +-- js/
 +-- README.md
 +-- assets/
+```
+
+## Supabase Deployment Checklist
+
+Before deploying to Vercel, add the deployed site URL to Supabase Authentication URL Configuration:
+
+```txt
+https://YOUR-VERCEL-PROJECT.vercel.app
+https://YOUR-VERCEL-PROJECT.vercel.app/
+https://YOUR-VERCEL-PROJECT.vercel.app/htmls/reset-password.html
+```
+
+Keep the localhost URLs while testing locally:
+
+```txt
+http://localhost:8000
+http://localhost:8000/
+http://localhost:8000/htmls/reset-password.html
 ```
 
 ## Future Improvements
@@ -88,4 +108,4 @@ recipe-scale/
 
 ## Author
 
-Made by Desiree as a JavaScript practice project.
+Made by Desiree 

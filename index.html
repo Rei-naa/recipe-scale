@@ -9,15 +9,21 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="index.html" aria-label="RecipeScale home">
+    <div class="brand">
       <span class="brand-mark" aria-hidden="true"></span>
       <span>RecipeScale</span>
-    </a>
-    <nav class="site-nav" aria-label="Primary navigation">
+    </div>
+    <nav class="site-nav is-hidden" aria-label="Primary navigation">
       <a href="index.html">Home</a>
       <a href="htmls/calculator.html">Calculator</a>
       <a href="htmls/saved-recipes.html">Saved Recipes</a>
     </nav>
+    <div class="header-actions" aria-label="Account actions">
+      <a class="header-login" href="htmls/login.html">Log in</a>
+      <a class="header-signup" href="htmls/create-account.html">Create Account</a>
+      <span class="header-user is-hidden" aria-live="polite"></span>
+      <button class="header-logout is-hidden" type="button">Log out</button>
+    </div>
   </header>
 
   <main>
@@ -31,10 +37,6 @@
         </p>
         <div class="button-row">
           <a class="btn btn-primary" href="htmls/calculator.html">Start Calculating</a>
-          <a class="text-link" href="#about">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-            How it works
-          </a>
         </div>
       </div>
 
@@ -84,7 +86,7 @@
         <article class="feature-card">
           <span class="feature-icon gold"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v16l-7-4-7 4z"/></svg></span>
           <h3>Recipe Vault</h3>
-          <p>Save favorite recipes locally in your browser and return to them anytime.</p>
+          <p>Save favorite recipes to your account and return to them anytime.</p>
         </article>
         <article class="feature-card">
           <span class="feature-icon orange"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10M7 12h10M7 16h6M5 4h14v16H5z"/></svg></span>
@@ -100,7 +102,7 @@
           <h2>Ready to get cooking?</h2>
           <p>Join thousands of home cooks scaling their culinary dreams with precision.</p>
         </div>
-        <a class="btn btn-gold" href="htmls/calculator.html">Create Free Account</a>
+        <a class="btn btn-gold" href="htmls/create-account.html">Create Free Account</a>
       </div>
     </section>
   </main>
@@ -108,5 +110,7 @@
   <footer class="site-footer page-shell">
     <p>&copy; 2026 RecipeScale. Built for clear kitchen math.</p>
   </footer>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="auth/supabase-auth.js"></script>
 </body>
 </html>

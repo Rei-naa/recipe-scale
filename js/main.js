@@ -1,8 +1,8 @@
 (function () {
   const calculator = window.RecipeScaleCalculator;
-  const storage = window.RecipeScaleStorage;
   const units = ["grams", "kilograms", "milliliters", "liters", "cups", "tablespoons", "teaspoons", "pieces"];
   let editingRecipeId = null;
+  let currentUser = null;
 
   function $(selector, root) {
     return (root || document).querySelector(selector);
@@ -25,6 +25,42 @@
     return Number(String(value || "").replace(",", "."));
   }
 
+  function stripStepPrefix(value) {
+    const text = String(value || "").trim();
+    return text.replace(/^step\s*\d+\s*[:.)-]?\s*/i, "").trim() || text;
+  }
+
+  function instructionTextsFromValue(value) {
+    if (!value) return [];
+
+    if (Array.isArray(value)) {
+      return value.flatMap(instructionTextsFromValue);
+    }
+
+    if (typeof value === "object") {
+      return [value.body || value.text || value.title || ""]
+        .map(stripStepPrefix)
+        .filter(Boolean);
+    }
+
+    const text = String(value).trim();
+    if (!text) return [];
+
+    try {
+      const parsed = JSON.parse(text);
+      if (parsed !== text) {
+        return instructionTextsFromValue(parsed);
+      }
+    } catch (error) {
+      // Keep supporting older plain-text instruction values.
+    }
+
+    return text
+      .split(/\r?\n+|(?=\bstep\s+\d+\s*[:.)-]\s+)/i)
+      .map(stripStepPrefix)
+      .filter(Boolean);
+  }
+
   function getParams() {
     return new URLSearchParams(window.location.search);
   }
@@ -43,6 +79,137 @@
 
   function recipeImage(recipe) {
     return recipe && recipe.imageDataUrl ? recipe.imageDataUrl : assetPath("assets/images/pumpkin_Soup.png");
+  }
+
+  function todayText() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function hasSupabaseAuth() {
+    return !!(window.recipeScaleAuth && window.recipeScaleAuth.getCurrentUser);
+  }
+
+  async function initCurrentUser() {
+    if (!hasSupabaseAuth()) {
+      currentUser = null;
+      return null;
+    }
+
+    currentUser = await window.recipeScaleAuth.getCurrentUser();
+    return currentUser;
+  }
+
+  function normalizeIngredient(ingredient) {
+    return {
+      name: ingredient && ingredient.name ? String(ingredient.name) : "",
+      amount: ingredient && Number.isFinite(Number(ingredient.amount))
+        ? Number(ingredient.amount)
+        : Number(ingredient && ingredient.quantity) || 0,
+      unit: ingredient && ingredient.unit ? String(ingredient.unit) : "grams"
+    };
+  }
+
+  function normalizeStep(step, index) {
+    if (typeof step === "string") {
+      return {
+        title: "Step " + (index + 1),
+        body: stripStepPrefix(step)
+      };
+    }
+
+    const title = step && step.title ? String(step.title) : "";
+    const body = step && step.body ? String(step.body) : "";
+
+    return {
+      title: title || (body ? "Step " + (index + 1) : ""),
+      body: body
+    };
+  }
+
+  function normalizeRecipe(recipe) {
+    const ingredients = Array.isArray(recipe && recipe.ingredients)
+      ? recipe.ingredients.map(normalizeIngredient).filter(function (ingredient) {
+          return ingredient.name || ingredient.amount > 0;
+        })
+      : [];
+
+    const storedSteps = Array.isArray(recipe && recipe.steps) && recipe.steps.length
+      ? recipe.steps
+      : instructionTextsFromValue(recipe && recipe.steps);
+    const storedInstructions = instructionTextsFromValue(recipe && recipe.instructions);
+    const rawSteps = storedSteps.length ? storedSteps : storedInstructions;
+
+    const steps = rawSteps.map(normalizeStep).filter(function (step) {
+      return step.title || step.body;
+    });
+
+    return {
+      id: recipe && recipe.id ? String(recipe.id) : "",
+      name: recipe && recipe.name ? String(recipe.name) : "Untitled Recipe",
+      description: recipe && recipe.description ? String(recipe.description) : "",
+      originalServing: recipe && Number.isFinite(Number(recipe.originalServing)) ? Number(recipe.originalServing) : 1,
+      targetServing: recipe && Number.isFinite(Number(recipe.targetServing)) ? Number(recipe.targetServing) : 1,
+      ingredients: ingredients,
+      imageDataUrl: recipe && recipe.imageDataUrl ? String(recipe.imageDataUrl) : "",
+      steps: steps,
+      prepTime: recipe && recipe.prepTime ? String(recipe.prepTime) : "",
+      cookTime: recipe && recipe.cookTime ? String(recipe.cookTime) : "",
+      difficulty: recipe && recipe.difficulty ? String(recipe.difficulty) : "Intermediate",
+      updatedAt: recipe && recipe.updatedAt ? String(recipe.updatedAt) : todayText()
+    };
+  }
+
+  function databaseRecipeToAppRecipe(recipe) {
+    const ingredients = Array.isArray(recipe && recipe.ingredients)
+      ? recipe.ingredients.map(normalizeIngredient)
+      : [];
+
+    return normalizeRecipe({
+      id: recipe.id,
+      name: recipe.title,
+      description: recipe.notes || "",
+      originalServing: Number(recipe.original_servings) || 1,
+      targetServing: Number(recipe.target_servings) || Number(recipe.original_servings) || 1,
+      ingredients: ingredients,
+      instructions: recipe.instructions,
+      updatedAt: recipe.updated_at ? String(recipe.updated_at).slice(0, 10) : todayText()
+    });
+  }
+
+  async function getSavedRecipes() {
+    if (!currentUser || !window.recipeScaleAuth) {
+      return [];
+    }
+
+    const recipes = await window.recipeScaleAuth.getRecipes();
+    return recipes.map(databaseRecipeToAppRecipe);
+  }
+
+  async function findSavedRecipe(recipeId) {
+    const recipes = await getSavedRecipes();
+    return recipes.find(function (recipe) {
+      return recipe.id === recipeId;
+    });
+  }
+
+  async function persistRecipe(recipe) {
+    if (!currentUser || !window.recipeScaleAuth) {
+      throw new Error("Log in to save recipes to your account.");
+    }
+
+    if (recipe.id) {
+      return databaseRecipeToAppRecipe(await window.recipeScaleAuth.updateRecipe(recipe.id, recipe));
+    }
+
+    return databaseRecipeToAppRecipe(await window.recipeScaleAuth.saveRecipe(recipe));
+  }
+
+  async function removeSavedRecipe(recipeId) {
+    if (!currentUser || !window.recipeScaleAuth) {
+      throw new Error("Log in to delete recipes from your account.");
+    }
+
+    await window.recipeScaleAuth.deleteRecipe(recipeId);
   }
 
   function installImageFallback(image) {
@@ -117,6 +284,10 @@
 
   function readRecipe() {
     if (!$("#recipeName")) return null;
+    const steps = readStepRows().filter(function (step) {
+      return step.title || step.body;
+    });
+
     return {
       id: editingRecipeId || "",
       name: $("#recipeName").value.trim(),
@@ -133,10 +304,43 @@
           unit: $(".ingredient-unit", row).value
         };
       }),
-      steps: readStepRows().filter(function (step) {
-        return step.title || step.body;
-      })
+      steps: steps,
+      instructions: steps.map(function (step) {
+        return step.body || step.title;
+      }).filter(Boolean)
     };
+  }
+
+  function instructionBodyText(step, index) {
+    if (typeof step === "string") {
+      return stripStepPrefix(step);
+    }
+
+    const body = step && step.body ? String(step.body).trim() : "";
+    const title = step && step.title ? String(step.title).trim() : "";
+    const defaultTitle = "Step " + (index + 1);
+
+    return body || (title && title !== defaultTitle ? title : "");
+  }
+
+  function renderInstructionSteps(steps) {
+    if (!steps.length) {
+      return "<p class=\"muted-note\">No instructions added yet.</p>";
+    }
+
+    return steps.map(function (step, index) {
+      return [
+        "<div class=\"instruction-step\">",
+        "<h3>Step " + (index + 1) + "</h3>",
+        "<p>" + escapeHtml(instructionBodyText(step, index) || "No instruction text added.") + "</p>",
+        "</div>"
+      ].join("");
+    }).join("");
+  }
+
+  function normalizedPrintStepText(step, index) {
+    const body = instructionBodyText(step, index);
+    return body || "No instruction text added.";
   }
 
   function validateRecipe(recipe) {
@@ -195,12 +399,20 @@
     return recipe;
   }
 
-  function saveRecipe() {
+  async function saveRecipe(button) {
     const recipe = calculateRecipe();
     if (!recipe) return;
-    const saved = storage.saveRecipe(recipe);
-    editingRecipeId = saved.id;
-    showMessage("Recipe saved.", "success");
+    if (button) button.disabled = true;
+    showMessage("Saving recipe...", "");
+    try {
+      const saved = await persistRecipe(recipe);
+      editingRecipeId = saved.id;
+      showMessage("Recipe saved to your account.", "success");
+    } catch (error) {
+      showMessage(error.message || "Unable to save recipe.", "error");
+    } finally {
+      if (button) button.disabled = false;
+    }
   }
 
   function fillRecipe(recipe) {
@@ -235,29 +447,36 @@
     }
   }
 
-  function loadRecipeFromUrl() {
+  async function loadRecipeFromUrl() {
     const params = getParams();
     const id = params.get("recipeId");
     if (!id) return;
-    const recipe = storage.findRecipe(id);
+    showMessage("Loading saved recipe...", "");
+    let recipe = null;
+    try {
+      recipe = await findSavedRecipe(id);
+    } catch (error) {
+      showMessage(error.message || "Unable to load saved recipe.", "error");
+      return;
+    }
     if (!recipe) {
       showMessage("Saved recipe could not be found.", "error");
       return;
     }
     fillRecipe(recipe);
     if (params.get("mode") === "calculate") {
-      showMessage("Recipe loaded. Adjust the target yield and calculate. It will only update localStorage if you click Save Recipe.", "success");
+      showMessage("Recipe loaded. Adjust the target yield and calculate. It will only save changes if you click Save Recipe.", "success");
     } else {
       showMessage("Recipe loaded for editing.", "success");
     }
     location.hash = "#calculator";
   }
 
-  function initCalculator() {
+  async function initCalculator() {
     if (!$("#ingredientsList")) return;
     renderIngredientRows([{ name: "", amount: "", unit: "grams" }]);
     renderStepRows([{ title: "", body: "" }]);
-    loadRecipeFromUrl();
+    await loadRecipeFromUrl();
 
     $("#addIngredientBtn").addEventListener("click", function () {
       const ingredients = readRecipe().ingredients;
@@ -295,14 +514,42 @@
       const recipe = calculateRecipe();
       if (recipe) location.hash = "#results";
     });
-    $("#saveRecipeBtn").addEventListener("click", saveRecipe);
+    $("#saveRecipeBtn").addEventListener("click", function (event) {
+      saveRecipe(event.currentTarget);
+    });
     $("#clearFormBtn").addEventListener("click", clearForm);
   }
 
-  function renderSavedRecipes() {
+  async function renderSavedRecipes() {
     const mount = $("#savedRecipes");
     if (!mount) return;
-    const recipes = storage.getRecipes();
+    if (!currentUser) {
+      mount.innerHTML = [
+        "<article class=\"empty-state\">",
+        "<h3>Log in to view saved recipes.</h3>",
+        "<p>Your recipes are saved to your RecipeScale account.</p>",
+        "<div class=\"button-row\">",
+        "<a class=\"btn btn-primary\" href=\"" + pagePath("login.html") + "\">Log in</a>",
+        "<a class=\"btn btn-outline\" href=\"" + pagePath("create-account.html") + "\">Create Account</a>",
+        "</div>",
+        "</article>"
+      ].join("");
+      return;
+    }
+
+    mount.innerHTML = "<article class=\"empty-state\"><h3>Loading recipes...</h3></article>";
+    let recipes = [];
+    try {
+      recipes = await getSavedRecipes();
+    } catch (error) {
+      mount.innerHTML = [
+        "<article class=\"empty-state\">",
+        "<h3>Unable to load recipes.</h3>",
+        "<p>" + escapeHtml(error.message || "Please try again.") + "</p>",
+        "</article>"
+      ].join("");
+      return;
+    }
     if (!recipes.length) {
       mount.innerHTML = [
         "<article class=\"empty-state\">",
@@ -333,18 +580,27 @@
     installImageFallbacks(mount);
   }
 
-  function initSavedRecipes() {
+  async function initSavedRecipes() {
     const savedRecipes = $("#savedRecipes");
     if (!savedRecipes) return;
-    renderSavedRecipes();
-    savedRecipes.addEventListener("click", function (event) {
+    await renderSavedRecipes();
+    savedRecipes.addEventListener("click", async function (event) {
       const button = event.target.closest("button[data-action]");
       if (!button) return;
       const id = button.dataset.id;
       const action = button.dataset.action;
       if (action === "delete") {
-        storage.deleteRecipe(id);
-        renderSavedRecipes();
+        const originalText = button.textContent;
+        button.disabled = true;
+        button.textContent = "Deleting...";
+        try {
+          await removeSavedRecipe(id);
+          await renderSavedRecipes();
+        } catch (error) {
+          button.disabled = false;
+          button.textContent = originalText;
+          savedRecipes.insertAdjacentHTML("afterbegin", "<article class=\"empty-state\"><h3>Unable to delete recipe.</h3><p>" + escapeHtml(error.message || "Please try again.") + "</p></article>");
+        }
         return;
       }
       if (action === "view") {
@@ -371,16 +627,91 @@
     ].join("");
   }
 
-  function renderRecipeView() {
+  function printDetailItem(label, value) {
+    return [
+      "<div>",
+      "<dt>" + escapeHtml(label) + "</dt>",
+      "<dd>" + escapeHtml(value || "Not set") + "</dd>",
+      "</div>"
+    ].join("");
+  }
+
+  function printIngredientText(ingredient) {
+    const amount = Number.isFinite(Number(ingredient.amount)) && Number(ingredient.amount) > 0
+      ? calculator.formatAmount(ingredient.amount)
+      : "";
+    const unit = ingredient.unit ? String(ingredient.unit) : "";
+    const name = ingredient.name ? String(ingredient.name) : "Unnamed ingredient";
+
+    return [amount, unit, name].filter(Boolean).join(" ");
+  }
+
+  function printStepText(step, index) {
+    return normalizedPrintStepText(step, index);
+  }
+
+  function renderPrintRecipe(recipe, ingredients, steps) {
+    const printIngredients = ingredients.length
+      ? ingredients.map(function (ingredient) {
+        return "<li>" + escapeHtml(printIngredientText(ingredient)) + "</li>";
+      }).join("")
+      : "<li>No ingredients added yet.</li>";
+
+    const printSteps = steps.length
+      ? steps.map(function (step, index) {
+        return "<li>" + escapeHtml(printStepText(step, index)) + "</li>";
+      }).join("")
+      : "<li>No instructions added yet.</li>";
+
+    return [
+      "<section class=\"print-recipe\" aria-label=\"Print-friendly recipe\">",
+      "<p class=\"print-brand\">RecipeScale</p>",
+      "<h1>" + escapeHtml(recipe.name || "Untitled Recipe") + "</h1>",
+      recipe.description ? "<section><h2>Description</h2><p>" + escapeHtml(recipe.description) + "</p></section>" : "",
+      "<section><h2>Recipe Details</h2>",
+      "<dl class=\"print-details\">",
+      printDetailItem("Prep Time", recipe.prepTime),
+      printDetailItem("Cook Time", recipe.cookTime),
+      printDetailItem("Difficulty", recipe.difficulty),
+      "</dl></section>",
+      "<section><h2>Ingredients</h2><ul class=\"print-list\">" + printIngredients + "</ul></section>",
+      "<section><h2>Instructions</h2><ol class=\"print-list\">" + printSteps + "</ol></section>",
+      "</section>"
+    ].join("");
+  }
+
+  async function renderRecipeView() {
     const mount = $("#recipeView");
     if (!mount) return;
     const id = getParams().get("id");
-    const recipe = id ? storage.findRecipe(id) : null;
+    if (!currentUser) {
+      mount.innerHTML = [
+        "<section class=\"empty-state detail-empty\">",
+        "<h1>Log in to view recipes</h1>",
+        "<p>Your saved recipes are attached to your account.</p>",
+        "<div class=\"button-row\">",
+        "<a class=\"btn btn-primary\" href=\"" + pagePath("login.html") + "\">Log in</a>",
+        "<a class=\"btn btn-outline\" href=\"" + pagePath("create-account.html") + "\">Create Account</a>",
+        "</div>",
+        "</section>"
+      ].join("");
+      return;
+    }
+
+    mount.innerHTML = "<section class=\"empty-state detail-empty\"><h1>Loading recipe...</h1></section>";
+    let recipe = null;
+    let loadError = "";
+    try {
+      recipe = id ? await findSavedRecipe(id) : null;
+    } catch (error) {
+      recipe = null;
+      loadError = error.message || "Please try again.";
+    }
     if (!recipe) {
       mount.innerHTML = [
         "<section class=\"empty-state detail-empty\">",
-        "<h1>Recipe not found</h1>",
-        "<p>This saved recipe may have been deleted or is unavailable in this browser.</p>",
+        "<h1>" + (loadError ? "Unable to load recipe" : "Recipe not found") + "</h1>",
+        "<p>" + escapeHtml(loadError || "This saved recipe may have been deleted or belongs to a different account.") + "</p>",
         "<a class=\"btn btn-primary\" href=\"" + pagePath("saved-recipes.html") + "\">Back to Saved Recipes</a>",
         "</section>"
       ].join("");
@@ -393,7 +724,6 @@
       "<section class=\"recipe-hero-detail\">",
       "<div class=\"recipe-hero-image\"><img src=\"" + escapeHtml(recipeImage(recipe)) + "\" data-fallback=\"" + assetPath("assets/images/cooking.png") + "\" alt=\"" + escapeHtml(recipe.name) + "\" /></div>",
       "<div class=\"recipe-hero-copy\">",
-      "<p class=\"eyebrow\">Saved Recipe</p>",
       "<h1>" + escapeHtml(recipe.name) + "</h1>",
       "<p>" + escapeHtml(recipe.description || "A saved RecipeScale favorite ready for yield adjustments and kitchen prep.") + "</p>",
       "<div class=\"recipe-meta-grid\">",
@@ -420,18 +750,10 @@
       "</article>",
       "<article class=\"detail-card instructions-detail-card\">",
       "<h2><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 4l16 16M20 4L4 20\"/></svg> Instructions</h2>",
-      steps.length ? steps.map(function (step, index) {
-        return [
-          "<div class=\"instruction-step\">",
-          "<input type=\"checkbox\" aria-label=\"Complete step " + (index + 1) + "\" />",
-          "<span class=\"step-number\">" + (index + 1) + "</span>",
-          "<div><h3>" + escapeHtml(step.title || "Step " + (index + 1)) + "</h3>",
-          "<p>" + escapeHtml(step.body || "") + "</p></div>",
-          "</div>"
-        ].join("");
-      }).join("") : "<p class=\"muted-note\">No instructions added yet.</p>",
+      renderInstructionSteps(steps),
       "</article>",
-      "</section>"
+      "</section>",
+      renderPrintRecipe(recipe, ingredients, steps)
     ].join("");
     installImageFallbacks(mount);
     const printButton = $("#printRecipeBtn");
@@ -442,11 +764,14 @@
     }
   }
 
-  function init() {
-    initCalculator();
-    initSavedRecipes();
-    renderRecipeView();
+  async function init() {
+    await initCurrentUser();
+    await initCalculator();
+    await initSavedRecipes();
+    await renderRecipeView();
   }
 
-  document.addEventListener("DOMContentLoaded", init);
+  document.addEventListener("DOMContentLoaded", function () {
+    init();
+  });
 })();

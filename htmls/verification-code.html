@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verification Code | RecipeScale</title>
+  <link rel="icon" type="image/png" href="../assets/images/logo_RecipeScale.png" />
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+<body class="auth-page">
+  <main class="auth-shell" aria-labelledby="authTitle">
+    <section class="auth-card">
+      <aside class="auth-visual" aria-label="RecipeScale baking workspace">
+        <img src="../assets/images/sourdough-hero.png" alt="Fresh sourdough bread on a kitchen counter" />
+        <div class="auth-visual-shade" aria-hidden="true"></div>
+        <div class="auth-brand">
+          <span class="auth-brand-mark" aria-hidden="true"></span>
+          <span>RecipeScale</span>
+        </div>
+        <div class="auth-visual-copy">
+          <h2>Scale your passion.</h2>
+          <p>Precision in every portion, designed for the modern home chef.</p>
+        </div>
+      </aside>
+
+      <section class="auth-panel">
+        <a class="auth-back" href="forgot-password.html" aria-label="Back to forgot password">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          Back
+        </a>
+
+        <div class="auth-heading">
+          <h1 id="authTitle">Verification Code</h1>
+          <p>We sent you a verification code on your email</p>
+        </div>
+
+        <form class="auth-form" action="reset-password.html">
+          <div class="auth-otp" role="group" aria-label="Verification code">
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 1" autocomplete="one-time-code" />
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 2" />
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 3" />
+            <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 4" />
+          </div>
+
+          <p class="auth-countdown">Resend Code in <strong data-countdown="24">00:24</strong></p>
+
+          <button class="btn btn-primary auth-submit" type="submit">Verify Code</button>
+        </form>
+
+        <footer class="auth-footer">
+          <span>&copy; 2026 RecipeScale.</span>
+          <nav aria-label="Authentication footer links">
+            <a href="#">Privacy</a>
+            <a href="#">Help</a>
+          </nav>
+        </footer>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

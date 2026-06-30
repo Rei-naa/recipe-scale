@@ -9,15 +9,21 @@
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="../index.html" aria-label="RecipeScale home">
+    <div class="brand">
       <span class="brand-mark" aria-hidden="true"></span>
       <span>RecipeScale</span>
-    </a>
-    <nav class="site-nav" aria-label="Primary navigation">
+    </div>
+    <nav class="site-nav is-hidden" aria-label="Primary navigation">
       <a href="../index.html">Home</a>
       <a href="calculator.html">Calculator</a>
       <a href="saved-recipes.html">Saved Recipes</a>
     </nav>
+    <div class="header-actions" aria-label="Account actions">
+      <a class="header-login" href="login.html">Log in</a>
+      <a class="header-signup" href="create-account.html">Create Account</a>
+      <span class="header-user is-hidden" aria-live="polite"></span>
+      <button class="header-logout is-hidden" type="button">Log out</button>
+    </div>
   </header>
 
   <main id="recipeView" class="recipe-view page-shell" aria-live="polite"></main>
@@ -26,8 +32,9 @@
     <p>&copy; 2026 RecipeScale. Built for clear kitchen math.</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../auth/supabase-auth.js"></script>
   <script src="../js/calculator.js"></script>
-  <script src="../js/storage.js"></script>
   <script src="../js/main.js"></script>
 </body>
 </html>
