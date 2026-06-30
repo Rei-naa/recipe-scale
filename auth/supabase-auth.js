@@ -1,6 +1,41 @@
 const SUPABASE_URL = "https://rswjnqyybsohfzrkvfdw.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJzd2pucXl5YnNvaGZ6cmt2ZmR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4MTAzODYsImV4cCI6MjA5ODM4NjM4Nn0.dWBiYptVZUso-sR32LTJppIy9uiTZ_XpzGDWKiHuDf0";
 
+let passwordTogglesReady = false;
+
+function initPasswordToggles() {
+  if (passwordTogglesReady) return;
+
+  const toggleButtons = Array.from(document.querySelectorAll("[data-password-toggle]"));
+  if (!toggleButtons.length) return;
+
+  passwordTogglesReady = true;
+
+  toggleButtons.forEach(function (button) {
+    const passwordField = button.closest(".auth-password");
+    const input = passwordField ? passwordField.querySelector("input") : null;
+
+    if (!input) return;
+
+    button.setAttribute("aria-pressed", "false");
+
+    button.addEventListener("click", function () {
+      const shouldShowPassword = input.type === "password";
+
+      input.type = shouldShowPassword ? "text" : "password";
+      button.classList.toggle("is-visible", shouldShowPassword);
+      button.setAttribute("aria-label", shouldShowPassword ? "Hide password" : "Show password");
+      button.setAttribute("aria-pressed", String(shouldShowPassword));
+    });
+  });
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initPasswordToggles, { once: true });
+} else {
+  initPasswordToggles();
+}
+
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 async function signUpUser(email, password) {
@@ -252,12 +287,14 @@ async function initAuthNavigation() {
   const signupLinks = Array.from(document.querySelectorAll(".header-signup"));
   const userBadges = Array.from(document.querySelectorAll(".header-user"));
   const logoutButtons = Array.from(document.querySelectorAll(".header-logout"));
+  const authRequiredElements = Array.from(document.querySelectorAll(".auth-required"));
 
   toggleElements(primaryNavs, !!user);
   toggleElements(loginLinks, !user);
   toggleElements(signupLinks, !user);
   toggleElements(userBadges, !!user);
   toggleElements(logoutButtons, !!user);
+  toggleElements(authRequiredElements, !!user);
 
   userBadges.forEach(function (badge) {
     badge.textContent = user ? user.email || "Signed in" : "";

@@ -1,4 +1,5 @@
 # RecipeScale
+<!-- cSpell:words Supabase htmls -->
 
 A simple recipe ingredient calculator that helps users scale ingredient measurements based on their target serving size.
 
@@ -108,4 +109,4 @@ http://localhost:8000/htmls/reset-password.html
 
 ## Author
 
-Made by Desiree 
+Made by Desiree
